@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>weather part3</title>
+   
+    <style>
+        #navbar {
+            border: 1px solid red;
+            width: 100%;
+            height: 70px;
+            display: grid;
+            grid-template-columns: 300px 300px;
+            grid-template-rows: 50px;
+            justify-content: space-between;
+            position: sticky;
+            top: 0px;
+            background-color: #1c9cf6
+        }
+
+        #navbar>div:nth-child(2) {
+            border: 1px solid red;
+            height: 70px;
+
+        }
+
+        #navbar>div:nth-child(1) {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+
+
+        }
+
+        #city {
+            padding: 8px;
+            width: 350px;
+            border: none;
+            border-bottom: 1px solid black;
+            outline: none;
+
+
+        }
+
+        #search {
+            padding: 8px;
+            width: 350px;
+            border: none;
+            border-bottom: 1px solid black;
+            outline: none;
+
+
+        }
+
+        #navbar>div>img {
+            width: 100%;
+            height: 70px;
+
+        }
+
+        #container {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+    
+            left: 30px;
+            top: 130px;
+            border-radius: 10px;
+            box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 16px;
+            font-size: 14px;
+          
+        }
+
+        #container>p{
+            color:rgb(172, 149, 108);
+        }
+
+        .mapouter {
+            position: fixed;
+ 
+            text-align: right;
+            top: 130px;
+            left: 600px;
+            height: 500px;
+            width: 600px;
+        }
+
+
+        .gmap_canvas {
+            overflow: hidden;
+            background: none !important;
+            height: 500px;
+            width: 600px;
+        }
+    </style>
+ 
+
+
+</head>
+
+<body onload="getLocation();">
+    <div id="navbar">
+
+        <div>
+            <input type="text" placeholder="weather" id="city">
+            <button id="search" onclick="getData()">search</button>
+        </div>
+
+        <div>
+            <img src="https://is4-ssl.mzstatic.com/image/thumb/Purple112/v4/d3/b9/76/d3b97619-f61d-1d6d-7bea-81fbe12fc8ea/AppIcon-0-0-1x_U007emarketing-0-0-0-10-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/1200x600wa.png"
+                alt="img">
+        </div>
+
+    </div>
+
+
+    <div id="container"></div>
+
+    <div class="mapouter">
+        <div class="gmap_canvas">
+            <iframe 
+            width="600" 
+            height="500" 
+            id="gmap_canvas"
+                
+           
+            frameborder="0" 
+            scrolling="no"
+            marginheight="0" 
+            marginwidth="0"
+            
+            ></iframe>
+           
+         
+        </div>
+    </div>
+
+
+</body>
+
+</html>
+
+
+
+
+<script>
+
+    function getData() {
+        let city = document.getElementById("city").value;
+        let url = ` https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=1ea14816501e194e1bd28df958899235`;
+
+        fetch(url)
+            .then(function (res) {
+                return res.json();
+            })
+            .then(function (res) {
+                append(res)
+                console.log(res);
+            })
+            .catch(function (err) {
+                console.log(err);
+                let image = document.createElement("img");
+                image.src = "https://image.shutterstock.com/image-vector/warning-caution-sign-danger-symbol-260nw-1298117836.jpg"
+                document.querySelector("#container").append(image);
+            })
+    }
+
+    // "https://maps.google.com/maps?q=&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+    function append(data) {
+ 
+         let url = `https://maps.google.com/maps?q=${data.name}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+        
+           
+        let container = document.getElementById("container");
+        container.innerHTML = null;
+        let h2 = document.createElement("h2");
+        h2.innerText = data.name
+
+        let Temp = document.createElement("p")
+        let a = data.main.temp
+        let b = a.toFixed(0);
+        Temp.innerText = `Temp:- ${b - 273}'C`;
+
+        let min_temp = document.createElement("p");
+        let c = data.main.temp_min;
+        let d = c.toFixed(0);
+        min_temp.innerText = `Min_Temp:- ${(d - 280)}'C`;
+     
+
+        let max_temp = document.createElement("p");
+        let x = data.main.temp_max
+      let y = x.toFixed(0)
+      console.log(y);
+        max_temp.innerText = `Max_Temp:- ${y - 265}'C`;
+       
+
+
+        let clouds = document.createElement("p");
+        clouds.innerText = `clouds:- ${data.clouds.all}`;
+
+        let wind = document.createElement("p");
+        wind.innerText = `wind:- ${data.wind.speed}`;
+
+        let sunrise = document.createElement("p");
+        sunrise.innerText = `sunrise:- ${data.sys.sunrise}`;
+
+        let sunset = document.createElement("p");
+        sunset.innerText = `sunset:- ${data.sys.sunset}`;
+
+
+
+        container.append(h2, Temp, min_temp, max_temp, clouds, wind, sunrise, sunset);
+ 
+        let iframe= document.querySelector("#gmap_canvas")
+        iframe.src=url;
+
+
+    }
+
+
+    function getLocation() {
+  navigator.geolocation.getCurrentPosition(success);
+
+  function success(pos) {
+    const crd = pos.coords;
+
+    console.log("Your current position is:");
+    console.log(`Latitude : ${crd.latitude}`);
+    console.log(`Longitude: ${crd.longitude}`);
+    console.log(`More or less ${crd.accuracy} meters.`);
+    getWeatherOnLocation(crd.latitude, crd.longitude);
+  }
+}
+
+
+
+function getWeatherOnLocation(lat, lon) {
+  let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=1ea14816501e194e1bd28df958899235 `;
+
+  fetch(url)
+    .then(function (res) {
+      return res.json();
+    })
+    .then(function (res) {
+      console.log(res);
+      append(res);
+    })
+    .catch(function (err) {
+      console.log(err);
+    });
+}
+
+</script>
+
+
+
+
+
+
+
+
+<!-- https://api.openweathermap.org/data/2.5/weather?q=muzaffarnagar&appid=1ea14816501e194e1bd28df958899235 -->
